@@ -1,16 +1,16 @@
-CFLAGS=-g -O1 -Wall -Wextra -pedantic -std=c++14 -Isrc -Wno-vla
-LFLAGS=-g -O1 -Wall -Wextra -pedantic -std=c++14 -Isrc -lSDL2 -ldl -lassimp -lncurses
+IGNORED_WARNINGS = -Wno-unused-result -Wno-trigraphs -Wno-vla -Wno-nested-anon-types -Wno-missing-braces -Wno-vla-extension
+CFLAGS=-g -O1 -Wall -Wextra -pedantic -std=c++1z -Isrc $(IGNORED_WARNINGS)
+LFLAGS=-g -O1 -Wall -Wextra -pedantic -std=c++1z -Isrc -lSDL2 -ldl -lassimp -lncurses
 
 OBJS=\
+	src/gl3w.o \
+	src/platform.o \
+	src/maths.o \
+	src/asset.o \
+	src/rendering.o \
+	src/entity.o \
 	src/main.o \
-#	src/gl3w.o \
-#	src/platform.o \
-#	src/maths.o \
-#	src/asset.o \
-#	src/rendering.o \
-#	src/entity.o \
-#	src/main.o \
-#	src/world.o \
+	src/world.o \
 
 .PHONY: clean
 
