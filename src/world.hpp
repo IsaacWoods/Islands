@@ -37,6 +37,7 @@ struct Triangle
     ,edge1(Edge(a, b))
     ,edge2(Edge(b, c))
     ,edge3(Edge(c, a))
+    ,centroid((a+b+c)/3.0f)
   { }
 
   Vec<2u> a;
@@ -45,6 +46,7 @@ struct Triangle
   Edge    edge1;
   Edge    edge2;
   Edge    edge3;
+  Vec<2u> centroid;
 
   bool ContainsVertex(const Vec<2u>& v) const
   {
@@ -90,7 +92,6 @@ private:
 
   std::vector<Triangle> triangles;
   std::vector<Edge>     edges;
-  std::vector<Vec<2u>>  centroids;
 
   GLuint                pointsVAO;
   GLuint                pointsVBO;

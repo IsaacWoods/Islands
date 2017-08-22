@@ -153,6 +153,12 @@ void SetUniform<Texture>(Shader& shader, const char* name, const Texture& value)
 }
 
 template<>
+void SetUniform<Vec<4u>>(Shader& shader, const char* name, const Vec<4u>& v)
+{
+  glUniform4f(glGetUniformLocation(shader.handle, name), v.x(), v.y(), v.z(), v.w());
+}
+
+template<>
 void SetUniform<Mat<4u>>(Shader& shader, const char* name, const Mat<4u>& mat)
 {
   glUniformMatrix4fv(glGetUniformLocation(shader.handle, name), 1, GL_FALSE, &(mat[0u][0u]));

@@ -53,13 +53,17 @@ World::World(const std::string& name, unsigned int numPoints)
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vec<2u>), (void*)0);
   glEnableVertexAttribArray(0);
 
-  FindCentroids();
+  std::vector<Vec<2u>> centroids;
+  for (const Triangle& triangle : triangles)
+  {
+    centroids.push_back(triangle.centroid);
+  }
 
-  glGenVertexArrays(1, &centroidsVAO);
-  glBindVertexArray(centroidsVAO);
-  glGenBuffers(1, &centroidsVBO);
-  glBindBuffer(GL_ARRAY_BUFFER, pointsVBO);
-  glBufferData(GL_ARRAY_BUFFER, numPoints * sizeof(Vec<2u>), &(points[0u]), GL_STATIC_DRAW);
+  glGenVertexArrays(1, &centroidVAO);
+  glBindVertexArray(centroidVAO);
+  glGenBuffers(1, &centroidVBO);
+  glBindBuffer(GL_ARRAY_BUFFER, centroidVBO);
+  glBufferData(GL_ARRAY_BUFFER, centroids.size() * sizeof(Vec<2u>), &(centroids[0u]), GL_STATIC_DRAW);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vec<2u>), (void*)0);
   glEnableVertexAttribArray(0);
 }
@@ -77,6 +81,7 @@ World::~World()
 
 void World::Render(Renderer& renderer)
 {
+  SetUniform(renderer.shader, "color", Vec<4u>(1.0, 0.0, 1.0, 1.0));
   glBindVertexArray(pointsVAO);
   glBindBuffer(GL_ARRAY_BUFFER, pointsVBO);
   glDrawArrays(GL_POINTS, 0, numPoints);
@@ -84,6 +89,11 @@ void World::Render(Renderer& renderer)
   glBindVertexArray(triangleEdgeVAO);
   glBindBuffer(GL_ARRAY_BUFFER, triangleEdgeVBO);
   glDrawArrays(GL_LINES, 0, edges.size() * 4u);
+
+  SetUniform(renderer.shader, "color", Vec<4u>(1.0, 1.0, 1.0, 1.0));
+  glBindVertexArray(centroidVAO);
+  glBindBuffer(GL_ARRAY_BUFFER, centroidVBO);
+  glDrawArrays(GL_POINTS, 0, triangles.size());
 
   for (Entity* entity : entities)
   {
