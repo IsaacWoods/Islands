@@ -7,6 +7,7 @@
 #include <chrono>
 #include <platform.hpp>
 #include <asset.hpp>
+#include <world.hpp>
 #include <rendering.hpp>
 
 static inline float GetTime()
@@ -17,28 +18,16 @@ static inline float GetTime()
 
 int main()
 {
-  const unsigned int width = 1920u;
-  const unsigned int height = 1080u;
-  InitPlatform(width, height, true, "Suku");
-  Controller controller;
-
-  Renderer renderer(width, height);
-  Texture texture("./res/house.png");
-  Mesh mesh(ParseMeshData("./res/house.dae", false));
-
-  Entity* test = new Entity("test");
-//  test->transform.rotation = Quaternion(Vec<3u>(0.5f, 1.0f, 0.0f), RADIANS(-55));
-//  test->transform.rotation = Quaternion(Vec<3u>(0.0f, 1.0f, 0.0f), RADIANS(-45));
-  test->transform.rotation *= Quaternion(Vec<3u>(1.0f, 0.0f, 0.0f), RADIANS(-90));
-  //Print("Rotation of test entity: %v4\n", test->transform.rotation);
-  test->AddComponent(new Renderable(&mesh, &texture));
-  test->AddComponent(new Controllable(&controller));
-
-  Area area("test");
-  area.entities.push_back(test);
-
+  const unsigned int WIDTH = 1920;
+  const unsigned int HEIGHT = 1080;
   const float FRAME_TIME = 1.0f / 60.0f;
   const float PROFILE_TIME = 1.0f;   // NOTE(Isaac): how often the FPS and frame time should be profiled (seconds)
+
+  InitPlatform(WIDTH, HEIGHT, true, "Suku");
+  Controller controller;
+  Renderer renderer(WIDTH, HEIGHT);
+
+  World world("test", 300u);
 
   //TermHandle fpsCounterHandle = CreateTermHandle();
   float lastTime = GetTime();
@@ -75,7 +64,7 @@ int main()
       }
 
       // --- Run a tick ---
-      test->Update(FRAME_TIME);
+      //test->Update(FRAME_TIME);
 
       shouldRender = true;
       unprocessedTime -= FRAME_TIME;
@@ -83,7 +72,9 @@ int main()
 
     if (shouldRender)
     {
-      RenderFrame(renderer, area);
+      renderer.StartFrame();
+      world.Render(renderer);
+      renderer.EndFrame();
       frames++;
     }
     else

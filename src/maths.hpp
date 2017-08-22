@@ -58,6 +58,17 @@ struct Vec
     v[N-1u] = last;
   }
 
+  // NOTE: I was hoping that this was possible with SFINAE and std::enable_if or something, but idk
+  float& x() { static_assert(N>0u, "Component 'x' does not exist");  return v[0u]; }
+  float& y() { static_assert(N>1u, "Component 'y' does not exist");  return v[1u]; }
+  float& z() { static_assert(N>2u, "Component 'z' does not exist");  return v[2u]; }
+  float& w() { static_assert(N>3u, "Component 'w' does not exist");  return v[3u]; }
+
+  float x() const { static_assert(N>0u, "Component 'x' does not exist");  return v[0u]; }
+  float y() const { static_assert(N>1u, "Component 'y' does not exist");  return v[1u]; }
+  float z() const { static_assert(N>2u, "Component 'z' does not exist");  return v[2u]; }
+  float w() const { static_assert(N>3u, "Component 'w' does not exist");  return v[3u]; }
+
   float& operator[](unsigned int i)
   {
     assert(i < N);
@@ -249,6 +260,38 @@ Vec<N>& operator/=(Vec<N>& v, float f)
   }
 
   return v;
+}
+
+template<unsigned int N>
+bool operator==(const Vec<N>& a, const Vec<N>& b)
+{
+  for (unsigned int i = 0u;
+       i < N;
+       i++)
+  {
+    if (a[i] != b[i])
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+template<unsigned int N>
+bool operator!=(const Vec<N>& a, const Vec<N>& b)
+{
+  for (unsigned int i = 0u;
+       i < N;
+       i++)
+  {
+    if (a[i] == b[i])
+    {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 template<unsigned int N>

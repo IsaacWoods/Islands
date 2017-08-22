@@ -16,6 +16,8 @@
 #include <gl3w.hpp>
 #include <maths.hpp>
 
+#define DISABLE_CURSES_LOGGING
+
 #ifndef DISABLE_CURSES_LOGGING
   #include <ncurses.h>
 #endif
@@ -352,6 +354,7 @@ Controller::Controller()
  * Create a TermHandle, manually leaving a line for it when it's printed to
  * TODO: Handles that cover multiple lines?
  */
+#if 0
 TermHandle CreateTermHandle()
 {
 #ifndef DISABLE_CURSES_LOGGING
@@ -367,7 +370,6 @@ TermHandle CreateTermHandle()
  * `%vN` - prints a Vec<N> (where N is between 1 and 9)
  * `%mN` - prints a Mat<N> (where N is between 1 and 9)
  */
-#if 0
 void Printv(const char* fmt, va_list args)
 {
 #ifdef DISABLE_CURSES_LOGGING

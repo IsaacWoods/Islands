@@ -1,6 +1,6 @@
 IGNORED_WARNINGS = -Wno-unused-result -Wno-trigraphs -Wno-vla -Wno-nested-anon-types -Wno-missing-braces -Wno-vla-extension
-CFLAGS=-g -O1 -Wall -Wextra -pedantic -std=c++1z -Isrc $(IGNORED_WARNINGS)
-LFLAGS=-g -O1 -Wall -Wextra -pedantic -std=c++1z -Isrc -lSDL2 -ldl -lassimp -lncurses
+CFLAGS=-g -O0 -Wall -Wextra -pedantic -std=c++1z -Isrc $(IGNORED_WARNINGS)
+LFLAGS=-g -O0 -Wall -Wextra -pedantic -std=c++1z -Isrc -lSDL2 -ldl -lassimp -lncurses
 
 OBJS=\
 	src/gl3w.o \
@@ -9,8 +9,8 @@ OBJS=\
 	src/asset.o \
 	src/rendering.o \
 	src/entity.o \
-	src/main.o \
 	src/world.o \
+	src/main.o \
 
 .PHONY: clean
 

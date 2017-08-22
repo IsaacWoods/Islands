@@ -9,7 +9,6 @@
 #include <maths.hpp>
 #include <asset.hpp>
 #include <entity.hpp>
-#include <world.hpp>
 
 // --- Mesh ---
 struct Mesh
@@ -54,10 +53,12 @@ struct Renderer
 {
   Renderer(unsigned int width, unsigned int height);
 
+  void StartFrame();
+  void RenderEntity(Entity* entity);
+  void EndFrame();
+
   unsigned int  width;
   unsigned int  height;
   Shader        shader;
   Mat<4u>       projection;
 };
-
-void RenderFrame(Renderer& renderer, const Area& area);

@@ -203,15 +203,18 @@ Renderer::Renderer(unsigned int width, unsigned int height)
   :width(width)
   ,height(height)
   ,shader("./res/test")
-  ,projection(PerspectiveProjection<4u>(RADIANS(45.0f), (float)width / (float)height, 0.1f, 100.0f))
+//  ,projection(PerspectiveProjection<4u>(RADIANS(45.0f), (float)width / (float)height, 0.1f, 100.0f))
+  ,projection(OrthographicProjection<4u>(1920.0f, 1080.0f, 0.1f, 100.0f))
 {
   glViewport(0, 0, width, height);
-  glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-  glEnable(GL_DEPTH_TEST);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-  glEnable(GL_CULL_FACE);
+  glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+//  glEnable(GL_DEPTH_TEST);
+
+/*  glEnable(GL_CULL_FACE);
   glCullFace(GL_BACK);
-  glFrontFace(GL_CCW);
+  glFrontFace(GL_CCW);*/
 }
 
 static Mat<4u> CalculateCameraViewMatrix(const Vec<3u>& cameraPos, const Vec<3u>& targetPos)
@@ -238,24 +241,28 @@ static Mat<4u> CalculateCameraViewMatrix(const Vec<3u>& cameraPos, const Vec<3u>
 
   return result;
 }
-void RenderFrame(Renderer& renderer, const Area& area)
+
+void Renderer::StartFrame()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  UseShader(renderer.shader);
-  SetUniform(renderer.shader, "view", CalculateCameraViewMatrix(Vec<3u>(0.0f, 0.0f, 5.0f), Vec<3u>(0.0f, 0.0f, 0.0f)));
-  SetUniform(renderer.shader, "projection", renderer.projection);
+  UseShader(shader);
+  SetUniform(shader, "projection", projection);
+}
 
-  for (Entity* entity : area.entities)
+void Renderer::RenderEntity(Entity* entity)
+{
+  const Renderable* renderable = entity->GetComponent<Renderable>();
+  assert(renderable);
+
+  if (renderable)
   {
-    const Renderable* renderable = entity->GetComponent<Renderable>();
-
-    if (renderable)
-    {
-      SetUniform(renderer.shader, "texture", *(renderable->texture));
-      SetUniform(renderer.shader, "model", CreateTransformation(entity->transform));
-      DrawMesh(*(renderable->mesh));
-    }
+    SetUniform(shader, "texture", *(renderable->texture));
+    SetUniform(shader, "model", CreateTransformation(entity->transform));
+    DrawMesh(*(renderable->mesh));
   }
+}
 
+void Renderer::EndFrame()
+{
   SwapWindowBuffer();
 }
