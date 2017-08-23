@@ -115,6 +115,10 @@ private:
   GLuint                polygonVBO;
   unsigned int          numPolygonIndices;
 
+  bool renderPoints;
+  bool renderDelaunay;
+  bool renderPolygons;
+
   void DelaunayTriangulate();
   void FindPolygons();
 };

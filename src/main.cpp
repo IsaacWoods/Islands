@@ -76,8 +76,6 @@ int main()
       renderer.StartFrame();
       world.Render(renderer);
 
-      ImGui::Text("Hello, World!\n");
-
       renderer.EndFrame();
       frames++;
     }

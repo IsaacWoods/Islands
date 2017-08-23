@@ -6,6 +6,7 @@
 #include <world.hpp>
 #include <random>
 #include <algorithm>
+#include <imgui/imgui.hpp>
 
 bool Triangle::HasVertex(const Vec<2u>& v) const
 {
@@ -44,6 +45,9 @@ World::World(const std::string& name, unsigned int numPoints)
   ,edges()
   ,polygons()
   ,numPolygonIndices(0u)
+  ,renderPoints(true)
+  ,renderDelaunay(true)
+  ,renderPolygons(true)
 {
   std::random_device randomDevice;        // On normal systems, this should be a hardware entropy source
   std::mt19937 generator(randomDevice()); // Create a standard Mersenne Twister PRNG seeded with randomDevice
@@ -139,22 +143,32 @@ World::~World()
 void World::Render(Renderer& renderer)
 {
   SetUniform(renderer.shader, "color", Vec<4u>(1.0, 0.0, 1.0, 1.0));
-  glBindVertexArray(pointsVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, pointsVBO);
-  glDrawArrays(GL_POINTS, 0, points.size());
 
-  glBindVertexArray(triangleEdgeVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, triangleEdgeVBO);
-  glDrawArrays(GL_LINES, 0, edges.size() * 4u);
+  if (renderPoints)
+  {
+    glBindVertexArray(pointsVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, pointsVBO);
+    glDrawArrays(GL_POINTS, 0, points.size());
+  }
 
-  SetUniform(renderer.shader, "color", Vec<4u>(1.0, 1.0, 1.0, 1.0));
-  glBindVertexArray(centroidVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, centroidVBO);
-  glDrawArrays(GL_POINTS, 0, triangles.size());
+  if (renderDelaunay)
+  {
+    glBindVertexArray(triangleEdgeVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, triangleEdgeVBO);
+    glDrawArrays(GL_LINES, 0, edges.size() * 4u);
+  }
 
-  glBindVertexArray(polygonVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, polygonVBO);
-  glDrawArrays(GL_LINES, 0, numPolygonIndices);
+  if (renderPolygons)
+  {
+    SetUniform(renderer.shader, "color", Vec<4u>(1.0, 1.0, 1.0, 1.0));
+    glBindVertexArray(centroidVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, centroidVBO);
+    glDrawArrays(GL_POINTS, 0, triangles.size());
+
+    glBindVertexArray(polygonVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, polygonVBO);
+    glDrawArrays(GL_LINES, 0, numPolygonIndices);
+  }
 
   for (Entity* entity : entities)
   {
@@ -163,6 +177,13 @@ void World::Render(Renderer& renderer)
       renderer.RenderEntity(entity);
     }
   }
+
+  ImGui::SetNextWindowSize(ImVec2(210, 100));
+  ImGui::Begin("Generation");
+  ImGui::Checkbox("Points", &renderPoints);
+  ImGui::Checkbox("Delaunay triangulation", &renderDelaunay);
+  ImGui::Checkbox("Barycentric dual mesh", &renderPolygons);
+  ImGui::End();
 }
 
 /*
