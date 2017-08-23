@@ -11,6 +11,10 @@ OBJS=\
 	src/entity.o \
 	src/world.o \
 	src/main.o \
+	src/imgui/imgui.o \
+	src/imgui/imgui_demo.o \
+	src/imgui/imgui_draw.o \
+	src/imgui/imgui_impl_sdl_gl3.o \
 
 .PHONY: clean
 

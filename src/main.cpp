@@ -9,6 +9,7 @@
 #include <asset.hpp>
 #include <world.hpp>
 #include <rendering.hpp>
+#include <imgui/imgui.hpp>
 
 static inline float GetTime()
 {
@@ -74,6 +75,9 @@ int main()
     {
       renderer.StartFrame();
       world.Render(renderer);
+
+      ImGui::Text("Hello, World!\n");
+
       renderer.EndFrame();
       frames++;
     }

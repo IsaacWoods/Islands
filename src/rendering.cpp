@@ -7,6 +7,7 @@
 #include <iostream>
 #include <platform.hpp>
 #include <gl3w.hpp>
+#include <imgui/imgui.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.hpp>
@@ -250,7 +251,9 @@ static Mat<4u> CalculateCameraViewMatrix(const Vec<3u>& cameraPos, const Vec<3u>
 
 void Renderer::StartFrame()
 {
+  PrepareFrame();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   UseShader(shader);
   SetUniform(shader, "projection", projection);
 }
@@ -270,5 +273,6 @@ void Renderer::RenderEntity(Entity* entity)
 
 void Renderer::EndFrame()
 {
+  ImGui::Render();
   SwapWindowBuffer();
 }

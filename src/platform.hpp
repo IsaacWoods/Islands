@@ -344,14 +344,7 @@ const char* GetAxisName(ControllerAxis axis);
 // Platform management
 void InitPlatform(unsigned int width, unsigned int height, bool fullscreen, const char* windowTitle);
 void PollWindowEvents(Controller& controller);
+void PrepareFrame();
 void SwapWindowBuffer();
 void RumbleController(float strength, unsigned int length);
 void DestroyPlatform();
-
-// Pretty terminal stuff
-#if 0
-TermHandle CreateTermHandle();
-void Printv(const char* fmt, va_list args);
-void Print(const char* fmt, ...);
-void Print(TermHandle& handle, const char* fmt, ...);
-#endif
