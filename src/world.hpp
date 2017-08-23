@@ -48,33 +48,40 @@ struct Triangle
   Edge    edge3;
   Vec<2u> centroid;
 
-  bool ContainsVertex(const Vec<2u>& v) const
-  {
-    return a == v || b == v || c == v;
-  }
+  bool HasVertex(const Vec<2u>& v) const;
+  bool DoesCircumCircleContain(const Vec<2u>& v) const;
+  bool operator==(const Triangle& other) const;
+};
 
-  bool DoesCircumCircleContain(const Vec<2u>& v) const
-  {
-    float aLengthSq = a.x()*a.x() + a.y()*a.y();
-    float bLengthSq = b.x()*b.x() + b.y()*b.y();
-    float cLengthSq = c.x()*c.x() + c.y()*c.y();
+struct DelaunayPoint
+{
+  DelaunayPoint(const Vec<2u>& position)
+    :position(position)
+  { }
 
-    float circumX = (aLengthSq * (c.y() - b.y()) + bLengthSq * (a.y() - c.y()) + cLengthSq * (b.y() - a.y())) /
-                    (a.x() * (c.y() - b.y()) + b.x() * (a.y() - c.y()) + c.x() * (b.y() - a.y())) / 2.0f;
-    float circumY = (aLengthSq * (c.x() - b.x()) + bLengthSq * (a.x() - c.x()) + cLengthSq * (b.x() - a.x())) /
-                    (a.y() * (c.x() - b.x()) + b.y() * (a.x() - c.x()) + c.y() * (b.x() - a.x())) / 2.0f;
-    float circumRadius = sqrtf((a.x() - circumX) * (a.x() - circumX) + (a.y() - circumY) * (a.y() - circumY));
+  Vec<2u> position;
+  std::vector<DelaunayPoint*> neighbors;
+};
 
-    float dist = sqrt((v.x() - circumX) * (v.x() - circumX) + (v.y() - circumY) * (v.y() - circumY));
-    return dist <= circumRadius;
-  }
+struct PolygonPoint
+{
+  PolygonPoint(const Vec<2u>& position)
+    :position(position)
+  { }
 
-  bool operator==(const Triangle& other) const
-  {
-    return (a == other.a || a == other.b || a == other.c) &&
-			     (b == other.a || b == other.b || b == other.c) && 
-			     (c == other.a || c == other.b || c == other.c);
-  }
+  Vec<2u> position;
+};
+
+struct Polygon
+{
+  Polygon()
+    :vertices()
+  { }
+
+  /*
+   * These should be wound anti-clockwise.
+   */
+  std::vector<PolygonPoint> vertices;
 };
 
 struct World
@@ -93,12 +100,21 @@ private:
   std::vector<Triangle> triangles;
   std::vector<Edge>     edges;
 
+  std::vector<Polygon>  polygons;
+
   GLuint                pointsVAO;
   GLuint                pointsVBO;
+
   GLuint                triangleEdgeVAO;
   GLuint                triangleEdgeVBO;
+
   GLuint                centroidVAO;
   GLuint                centroidVBO;
 
+  GLuint                polygonVAO;
+  GLuint                polygonVBO;
+  unsigned int          numPolygonIndices;
+
   void DelaunayTriangulate();
+  void FindPolygons();
 };

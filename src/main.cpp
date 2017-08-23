@@ -27,7 +27,7 @@ int main()
   Controller controller;
   Renderer renderer(WIDTH, HEIGHT);
 
-  World world("test", 300u);
+  World world("test", 700u);
 
   //TermHandle fpsCounterHandle = CreateTermHandle();
   float lastTime = GetTime();
