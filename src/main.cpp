@@ -28,7 +28,9 @@ int main()
   Controller controller;
   Renderer renderer(WIDTH, HEIGHT);
 
-  World world("test", 700u);
+  PointGenerator* pointGenerator = new JitteredPointGenerator(WIDTH, HEIGHT, 30u, 30u);
+  World world("test", pointGenerator, WIDTH, HEIGHT);
+  delete pointGenerator;
 
   //TermHandle fpsCounterHandle = CreateTermHandle();
   float lastTime = GetTime();

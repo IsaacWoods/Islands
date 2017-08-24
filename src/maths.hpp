@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <ostream>
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -205,6 +206,20 @@ struct Vec
     }
   }
 };
+
+template<unsigned int N>
+std::ostream& operator<<(std::ostream& stream, const Vec<N>& v)
+{
+  stream << "(";
+  for (unsigned int i = 0u;
+       i < N-1u;
+       i++)
+  {
+    stream << v[i] << ", ";
+  }
+  stream << v[N-1u] << ")";
+  return stream;
+}
 
 template<unsigned int N>
 Vec<N> operator*(float f, const Vec<N>& v)

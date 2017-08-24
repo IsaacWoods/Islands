@@ -84,15 +84,56 @@ struct Polygon
   std::vector<PolygonPoint> vertices;
 };
 
+struct PointGenerator
+{
+  PointGenerator(float width, float height)
+    :width(width)
+    ,height(height)
+  { }
+  virtual ~PointGenerator() = default;
+
+  virtual std::vector<Vec<2u>> Generate() = 0;
+
+  float width;
+  float height;
+};
+
+struct RandomPointGenerator : PointGenerator
+{
+  RandomPointGenerator(float width, float height, unsigned int numPoints)
+    :PointGenerator(width, height)
+    ,numPoints(numPoints)
+  { }
+
+  std::vector<Vec<2u>> Generate() override;
+
+  unsigned int numPoints;
+};
+
+struct JitteredPointGenerator : PointGenerator
+{
+  JitteredPointGenerator(float width, float height, unsigned int numColumns, unsigned int numRows)
+    :PointGenerator(width, height)
+    ,numColumns(numColumns)
+    ,numRows(numRows)
+  { }
+
+  std::vector<Vec<2u>> Generate() override;
+
+  unsigned int numColumns;
+  unsigned int numRows;
+};
+
 struct World
 {
-  World(const std::string& name, unsigned int numPoints);
+  World(const std::string& name, PointGenerator* pointGenerator, float width, float height);
   ~World();
 
   void Render(Renderer& renderer);
 
   std::string           name;
-  unsigned int          numPoints;
+  float                 width;
+  float                 height;
   std::vector<Entity*>  entities;
 private:
   std::vector<Vec<2u>>  points;
@@ -117,6 +158,7 @@ private:
 
   bool renderPoints;
   bool renderDelaunay;
+  bool renderCentroids;
   bool renderPolygons;
 
   void DelaunayTriangulate();

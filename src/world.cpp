@@ -4,6 +4,7 @@
  */
 
 #include <world.hpp>
+#include <iostream>
 #include <random>
 #include <algorithm>
 #include <imgui/imgui.hpp>
@@ -36,19 +37,10 @@ bool Triangle::operator==(const Triangle& other) const
 		     (c == other.a || c == other.b || c == other.c);
 }
 
-World::World(const std::string& name, unsigned int numPoints)
-  :name(name)
-  ,numPoints(numPoints)
-  ,entities()
-  ,points()
-  ,triangles()
-  ,edges()
-  ,polygons()
-  ,numPolygonIndices(0u)
-  ,renderPoints(true)
-  ,renderDelaunay(true)
-  ,renderPolygons(true)
+std::vector<Vec<2u>> RandomPointGenerator::Generate()
 {
+  std::vector<Vec<2u>> points;
+
   std::random_device randomDevice;        // On normal systems, this should be a hardware entropy source
   std::mt19937 generator(randomDevice()); // Create a standard Mersenne Twister PRNG seeded with randomDevice
   std::uniform_real_distribution<> distribution(0, 1);
@@ -57,8 +49,57 @@ World::World(const std::string& name, unsigned int numPoints)
        i < numPoints;
        i++)
   {
-    points.push_back(Vec<2u>(distribution(generator) * 1920.0f, distribution(generator) * 1080.0f));
+    points.push_back(Vec<2u>(distribution(generator) * width, distribution(generator) * height));
   }
+
+  return points;
+}
+
+std::vector<Vec<2u>> JitteredPointGenerator::Generate()
+{
+  std::vector<Vec<2u>> points;
+
+  std::random_device randomDevice;        // On normal systems, this should be a hardware entropy source
+  std::mt19937 generator(randomDevice()); // Create a standard Mersenne Twister PRNG seeded with randomDevice
+  std::uniform_real_distribution<> distribution(0, 1);
+
+  /*
+   * Generate a random point in each cell of a grid covering the space.
+   */
+  Vec<2u> gridSize = Vec<2u>(width / static_cast<float>(numColumns), height / static_cast<float>(numRows));
+
+  for (unsigned int y = 0u;
+       y < numColumns;
+       y++)
+  {
+    for (unsigned int x = 0u;
+         x < numRows;
+         x++)
+    {
+      Vec<2u> pointInGrid = Vec<2u>(distribution(generator) * gridSize.x(), distribution(generator) * gridSize.y());
+      points.push_back(Vec<2u>(static_cast<float>(x), static_cast<float>(y)) * gridSize + pointInGrid);
+    }
+  }
+
+  return points;
+}
+
+World::World(const std::string& name, PointGenerator* pointGenerator, float width, float height)
+  :name(name)
+  ,width(width)
+  ,height(height)
+  ,entities()
+  ,points()
+  ,triangles()
+  ,edges()
+  ,polygons()
+  ,numPolygonIndices(0u)
+  ,renderPoints(true)
+  ,renderDelaunay(true)
+  ,renderCentroids(true)
+  ,renderPolygons(true)
+{
+  points = pointGenerator->Generate();
 
   glGenVertexArrays(1, &pointsVAO);
   glBindVertexArray(pointsVAO);
@@ -158,13 +199,17 @@ void World::Render(Renderer& renderer)
     glDrawArrays(GL_LINES, 0, edges.size() * 4u);
   }
 
-  if (renderPolygons)
+  SetUniform(renderer.shader, "color", Vec<4u>(1.0, 1.0, 1.0, 1.0));
+
+  if (renderCentroids)
   {
-    SetUniform(renderer.shader, "color", Vec<4u>(1.0, 1.0, 1.0, 1.0));
     glBindVertexArray(centroidVAO);
     glBindBuffer(GL_ARRAY_BUFFER, centroidVBO);
     glDrawArrays(GL_POINTS, 0, triangles.size());
+  }
 
+  if (renderPolygons)
+  {
     glBindVertexArray(polygonVAO);
     glBindBuffer(GL_ARRAY_BUFFER, polygonVBO);
     glDrawArrays(GL_LINES, 0, numPolygonIndices);
@@ -178,10 +223,11 @@ void World::Render(Renderer& renderer)
     }
   }
 
-  ImGui::SetNextWindowSize(ImVec2(210, 100));
-  ImGui::Begin("Generation");
+  ImGui::SetNextWindowSize(ImVec2(210, 150));
+  ImGui::Begin("Generation", nullptr, ImGuiWindowFlags_NoResize);
   ImGui::Checkbox("Points", &renderPoints);
   ImGui::Checkbox("Delaunay triangulation", &renderDelaunay);
+  ImGui::Checkbox("Centroids", &renderCentroids);
   ImGui::Checkbox("Barycentric dual mesh", &renderPolygons);
   ImGui::End();
 }
@@ -189,7 +235,6 @@ void World::Render(Renderer& renderer)
 /*
  * Uses the Bowyer-Watson algorithm to find the Delaunay triangulation of a set of points
  */
-// TODO: Sometimes this randomly doesn't actually create a triangulation or doesn't include all of the points
 void World::DelaunayTriangulate()
 {
   // Create the super triangle
@@ -200,8 +245,8 @@ void World::DelaunayTriangulate()
   {
     if (point.x() < minPoint.x()) minPoint.x() = point.x();
     if (point.y() < minPoint.y()) minPoint.y() = point.y();
-    if (point.x() < maxPoint.x()) maxPoint.x() = point.x();
-    if (point.y() < minPoint.y()) maxPoint.y() = point.y();
+    if (point.x() > maxPoint.x()) maxPoint.x() = point.x();
+    if (point.y() > minPoint.y()) maxPoint.y() = point.y();
   }
 
   float dX = maxPoint.x() - minPoint.x();
